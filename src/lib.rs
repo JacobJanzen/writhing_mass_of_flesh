@@ -15,59 +15,84 @@
 use rand::Rng;
 use std::vec;
 
-pub struct Config {
+use clap::Parser;
+
+pub struct Gif {
     pub height: u16,
     pub width: u16,
     pub frames: u16,
-    pub out_file: String,
+    pub pixels: Vec<u8>,
+    point_data: Vec<PointData>,
+    cross_distance: f64,
+    points: Vec<Point>,
 }
 
-impl Config {
-    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Self, &'static str> {
-        args.next();
-
-        let width: u16 = match args.next() {
-            Some(arg) => match arg.parse() {
-                Ok(num) => num,
-                Err(_) => return Err("Width is not a number"),
-            },
-            None => return Err("Didn't get a width"),
-        };
-
-        let height: u16 = match args.next() {
-            Some(arg) => match arg.parse() {
-                Ok(num) => num,
-                Err(_) => return Err("Height is not a number"),
-            },
-            None => return Err("Didn't get a height"),
-        };
-
-        let frames: u16 = match args.next() {
-            Some(arg) => match arg.parse() {
-                Ok(num) => num,
-                Err(_) => return Err("Frames is not a number"),
-            },
-            None => return Err("Didn't get a frame count"),
-        };
-
-        let out_file = match args.next() {
-            Some(arg) => arg,
-            None => return Err("Didn't get an output file"),
-        };
-
-        Ok(Config {
-            height,
-            width,
-            frames,
-            out_file,
-        })
-    }
+#[derive(Clone)]
+struct Point {
+    pub x: u16,
+    pub y: u16,
 }
 
 #[derive(Clone)]
 struct PointData {
     min_dist: f64,
     closest_point: Point,
+}
+
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+pub struct Args {
+    /// width of the image
+    #[clap(short, long, value_parser)]
+    pub width: u16,
+
+    /// height of the image
+    #[clap(short, long, value_parser)]
+    pub height: u16,
+
+    /// number of gif frames
+    #[clap(short, long, value_parser)]
+    pub frames: u16,
+
+    /// number of cells to generate
+    #[clap(short, long, value_parser)]
+    pub num_cells: usize,
+
+    /// output file
+    #[clap(short, long, value_parser)]
+    pub out: String,
+}
+
+impl Args {
+    pub fn read() -> Self {
+        Args::parse()
+    }
+}
+
+impl Gif {
+    pub fn create_from_args(args: &Args) -> Self {
+        Gif {
+            height: args.height,
+            width: args.width,
+            frames: args.frames,
+            pixels: vec![0; args.height as usize * args.width as usize * 3],
+            point_data: vec![
+                PointData {
+                    min_dist: 0.0,
+                    closest_point: Point { x: 0, y: 0 }
+                };
+                args.height as usize * args.width as usize
+            ],
+            cross_distance: distance(
+                &Point { x: 0, y: 0 },
+                &Point {
+                    x: args.width - 1,
+                    y: args.height - 1,
+                },
+            ),
+            points: generate_points(args.width, args.height, args.num_cells),
+        }
+    }
 }
 
 impl PointData {
@@ -87,48 +112,6 @@ impl PointData {
 
         pd
     }
-}
-
-pub struct Gif {
-    pub height: u16,
-    pub width: u16,
-    pub frames: u16,
-    pub pixels: Vec<u8>,
-    point_data: Vec<PointData>,
-    cross_distance: f64,
-    points: Vec<Point>,
-}
-
-impl Gif {
-    pub fn create_from_config(config: &Config, num_cells: usize) -> Self {
-        Gif {
-            height: config.height,
-            width: config.width,
-            frames: config.frames,
-            pixels: vec![0; config.height as usize * config.width as usize * 3],
-            point_data: vec![
-                PointData {
-                    min_dist: 0.0,
-                    closest_point: Point { x: 0, y: 0 }
-                };
-                config.height as usize * config.width as usize
-            ],
-            cross_distance: distance(
-                &Point { x: 0, y: 0 },
-                &Point {
-                    x: config.width - 1,
-                    y: config.height - 1,
-                },
-            ),
-            points: generate_points(config.width, config.height, num_cells),
-        }
-    }
-}
-
-#[derive(Clone)]
-struct Point {
-    pub x: u16,
-    pub y: u16,
 }
 
 pub fn fill_canvas(gif: &mut Gif) {
