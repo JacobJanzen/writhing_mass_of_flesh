@@ -16,13 +16,13 @@ use std::fs::File;
 use std::process;
 
 use bubbles::Args;
-use bubbles::Gif;
+use bubbles::Image;
 
 fn main() {
     let args = Args::read();
 
     // create Gif data
-    let mut gif = Gif::create_from_args(&args);
+    let mut data = Image::create_from_args(&args);
 
     // Create encoder
     let mut image = File::create(args.out).unwrap();
@@ -34,8 +34,8 @@ fn main() {
     }
 
     // Create pixel array
-    bubbles::fill_canvas(&mut gif);
-    let frame = gif::Frame::from_rgb(gif.width, gif.height, &mut gif.pixels);
+    data.fill_canvas();
+    let frame = gif::Frame::from_rgb(data.width, data.height, &mut data.pixels);
 
     // Write frame to file
     encoder.write_frame(&frame).unwrap();

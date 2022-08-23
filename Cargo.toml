@@ -2,6 +2,11 @@
 name = "bubbles"
 version = "0.1.0"
 edition = "2021"
+authors = ["Jacob Janzen"]
+description = "Creates a procedurally generated image that sort of looks like bubbles"
+repository = "https://github.com/JacobJanzen/Bubbles/"
+license = "GPL-3.0"
+keywords = ["generative-art","gif"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
