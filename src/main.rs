@@ -33,10 +33,12 @@ fn main() {
         process::exit(1);
     }
 
-    // Create pixel array
-    data.fill_canvas();
-    let frame = gif::Frame::from_rgb(data.width, data.height, &mut data.pixels);
+    for i in 0..data.frames {
+        // Create pixel array
+        data.fill_canvas(i);
+        let frame = gif::Frame::from_rgb(data.width, data.height, &mut data.pixels);
 
-    // Write frame to file
-    encoder.write_frame(&frame).unwrap();
+        // Write frame to file
+        encoder.write_frame(&frame).unwrap();
+    }
 }

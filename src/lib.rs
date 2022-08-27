@@ -13,7 +13,7 @@
    with this program. If not, see https://www.gnu.org/licenses/.
 */
 use rand::Rng;
-use std::vec;
+use std::{f64::consts::PI, vec};
 
 use clap::Parser;
 
@@ -24,13 +24,22 @@ pub struct Image {
     pub pixels: Vec<u8>,
     point_data: Vec<PointData>,
     cross_distance: f64,
-    points: Vec<Point>,
+    ellipses: Vec<Ellipse>,
+}
+
+#[derive(Clone)]
+struct Ellipse {
+    centre: Point,
+    height: f64,
+    width: f64,
+    angle: f64,
+    curr_point: Point,
 }
 
 #[derive(Clone)]
 struct Point {
-    pub x: u16,
-    pub y: u16,
+    x: i64,
+    y: i64,
 }
 
 #[derive(Clone)]
@@ -84,25 +93,41 @@ impl Image {
                 args.height as usize * args.width as usize
             ],
             cross_distance: Point { x: 0, y: 0 }.distance(&Point {
-                x: args.width - 1,
-                y: args.height - 1,
+                x: args.width as i64 - 1,
+                y: args.height as i64 - 1,
             }),
-            points: generate_points(args.width, args.height, args.num_cells),
+            ellipses: generate_points(args.width, args.height, args.num_cells),
         }
     }
 
-    pub fn fill_canvas(&mut self) {
-        self.generate_noise();
+    pub fn fill_canvas(&mut self, frame: u16) {
+        self.generate_noise(frame);
     }
 
-    fn generate_noise(&mut self) {
+    fn generate_noise(&mut self, frame: u16) {
         let mut max_dist = 0.0;
+
+        let pos = 2.0 * PI * frame as f64 / self.frames as f64;
+        for ellipse in &mut self.ellipses {
+            let radius = (ellipse.height * ellipse.width)
+                / (ellipse.width * ellipse.width * (ellipse.angle + pos).sin()
+                    + ellipse.height * ellipse.height * (ellipse.angle + pos).sin())
+                .sqrt();
+            ellipse.curr_point.x = (ellipse.centre.x as f64 + radius * pos.sin()) as i64;
+            ellipse.curr_point.y = (ellipse.centre.y as f64 + radius * pos.cos()) as i64;
+        }
 
         // Get distance and nearest point for each point on the canvas
         for y in 0..self.height {
             for x in 0..self.width {
                 let index = y as usize * self.width as usize + x as usize;
-                self.point_data[index] = PointData::get_point_data(self, Point { x, y });
+                self.point_data[index] = PointData::get_point_data(
+                    self,
+                    Point {
+                        x: x as i64,
+                        y: y as i64,
+                    },
+                );
                 max_dist = f64::max(max_dist, self.point_data[index].min_dist);
             }
         }
@@ -120,7 +145,15 @@ impl Image {
             for x in 0..self.width {
                 let index = y as usize * self.width as usize + x as usize;
                 let val = 0xFF - (0xFF as f64 * self.point_data[index].min_dist) as u8;
-                self.set_pixel(val, val, val, Point { x, y });
+                self.set_pixel(
+                    0xCC,
+                    val,
+                    val,
+                    Point {
+                        x: x as i64,
+                        y: y as i64,
+                    },
+                );
             }
         }
     }
@@ -139,11 +172,11 @@ impl PointData {
             closest_point: Point { x: 0, y: 0 },
         };
 
-        for point in &image.points {
-            let d = p.distance(point);
+        for ellipse in &image.ellipses {
+            let d = p.distance(&ellipse.curr_point);
             if d < pd.min_dist {
                 pd.min_dist = d;
-                pd.closest_point = point.clone();
+                pd.closest_point = ellipse.curr_point.clone();
             }
         }
 
@@ -160,13 +193,25 @@ impl Point {
     }
 }
 
-fn generate_points(width: u16, height: u16, num_cells: usize) -> Vec<Point> {
-    let mut points = vec![Point { x: 0, y: 0 }; num_cells];
+fn generate_points(width: u16, height: u16, num_cells: usize) -> Vec<Ellipse> {
+    let mut ellipses = vec![
+        Ellipse {
+            centre: Point { x: 0, y: 0 },
+            height: 0.0,
+            width: 0.0,
+            angle: 0.0,
+            curr_point: Point { x: 0, y: 0 }
+        };
+        num_cells
+    ];
 
-    for p in &mut points {
-        p.x = rand::thread_rng().gen_range(0..width);
-        p.y = rand::thread_rng().gen_range(0..height);
+    for ellipse in &mut ellipses {
+        ellipse.centre.x = rand::thread_rng().gen_range(0..width) as i64;
+        ellipse.centre.y = rand::thread_rng().gen_range(0..height) as i64;
+        ellipse.height = rand::thread_rng().gen_range(1.0..height as f64 / 5.0);
+        ellipse.width = rand::thread_rng().gen_range(1.0..width as f64 / 5.0);
+        ellipse.angle = rand::thread_rng().gen_range(0.0..2.0 * PI);
     }
 
-    points
+    ellipses
 }
