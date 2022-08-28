@@ -40,5 +40,6 @@ fn main() {
 
         // Write frame to file
         encoder.write_frame(&frame).unwrap();
+        print!("=");
     }
 }

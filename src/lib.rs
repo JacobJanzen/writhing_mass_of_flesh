@@ -109,10 +109,12 @@ impl Image {
 
         let pos = 2.0 * PI * frame as f64 / self.frames as f64;
         for ellipse in &mut self.ellipses {
-            let radius = (ellipse.height * ellipse.width)
-                / (ellipse.width * ellipse.width * (ellipse.angle + pos).sin()
-                    + ellipse.height * ellipse.height * (ellipse.angle + pos).sin())
-                .sqrt();
+            let sin_theta = (ellipse.angle + pos).sin();
+            let cos_theta = (ellipse.angle + pos).sin();
+            let a = ellipse.width;
+            let b = ellipse.height;
+            let radius =
+                (a * b) / (a * a * sin_theta * sin_theta + b * b * cos_theta * cos_theta).sqrt();
             ellipse.curr_point.x = (ellipse.centre.x as f64 + radius * pos.sin()) as i64;
             ellipse.curr_point.y = (ellipse.centre.y as f64 + radius * pos.cos()) as i64;
         }
@@ -144,11 +146,24 @@ impl Image {
         for y in 0..self.height {
             for x in 0..self.width {
                 let index = y as usize * self.width as usize + x as usize;
-                let val = 0xFF - (0xFF as f64 * self.point_data[index].min_dist) as u8;
+                //let val = 0xFF - (0xFF as f64 * self.point_data[index].min_dist) as u8;
+                let red;
+                let green;
+                let blue;
+
+                if self.point_data[index].min_dist < 0.5 {
+                    red = 0xFF - (102.0 * self.point_data[index].min_dist) as u8;
+                    green = 0xFF - (512.0 * self.point_data[index].min_dist) as u8;
+                    blue = green;
+                } else {
+                    red = 0xFF - (408.0 * (self.point_data[index].min_dist - 0.5) + 51.0) as u8;
+                    green = 0;
+                    blue = 0;
+                }
                 self.set_pixel(
-                    0xCC,
-                    val,
-                    val,
+                    red,
+                    green,
+                    blue,
                     Point {
                         x: x as i64,
                         y: y as i64,
