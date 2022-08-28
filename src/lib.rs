@@ -110,9 +110,9 @@ impl Image {
         let pos = 2.0 * PI * frame as f64 / self.frames as f64;
         for ellipse in &mut self.ellipses {
             let sin_theta = (ellipse.angle + pos).sin();
-            let cos_theta = (ellipse.angle + pos).sin();
-            let a = ellipse.width;
-            let b = ellipse.height;
+            let cos_theta = (ellipse.angle + pos).cos();
+            let a = ellipse.width / 2.0;
+            let b = ellipse.height / 2.0;
             let radius =
                 (a * b) / (a * a * sin_theta * sin_theta + b * b * cos_theta * cos_theta).sqrt();
             ellipse.curr_point.x = (ellipse.centre.x as f64 + radius * pos.sin()) as i64;
