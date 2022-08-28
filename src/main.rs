@@ -19,8 +19,8 @@
 use std::fs::File;
 use std::process;
 
-use bubbles::Args;
-use bubbles::Image;
+use writhing_mass_of_flesh::Args;
+use writhing_mass_of_flesh::Image;
 
 fn main() {
     let args = Args::read(); // the arguments passed into the program
@@ -38,5 +38,5 @@ fn main() {
     }
 
     // create the image
-    bubbles::create_image(&mut data, &mut encoder);
+    writhing_mass_of_flesh::create_image(&mut data, &mut encoder);
 }
