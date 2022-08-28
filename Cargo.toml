@@ -14,3 +14,4 @@ keywords = ["generative-art","gif"]
 gif = "0.11.4"
 rand = "0.8.5"
 clap = { version = "3.2.17", features = ["derive"]}
+termsize = "0.1.6"

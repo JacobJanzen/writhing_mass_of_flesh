@@ -14,12 +14,16 @@
 */
 use std::fs::File;
 use std::process;
+use std::sync::mpsc;
+use std::thread;
 
 use bubbles::Args;
 use bubbles::Image;
 
 fn main() {
     let args = Args::read();
+    let (tx, rx) = mpsc::channel();
+    let width = termsize::get().unwrap().cols;
 
     // create Gif data
     let mut data = Image::create_from_args(&args);
@@ -33,13 +37,28 @@ fn main() {
         process::exit(1);
     }
 
+    thread::spawn(move || {
+        for received in rx {
+            let percent_done = received as f64 / data.frames as f64;
+
+            for i in 0..(width as i32 - 5) as i32 {
+                if i < (percent_done * width as f64) as i32 {
+                    print!("=");
+                } else {
+                    print!("-");
+                }
+            }
+            print!("[{}%]\r", (percent_done * 100.0) as i32);
+        }
+    });
+
     for i in 0..data.frames {
+        tx.send(i).unwrap();
         // Create pixel array
         data.fill_canvas(i);
         let frame = gif::Frame::from_rgb(data.width, data.height, &mut data.pixels);
 
         // Write frame to file
         encoder.write_frame(&frame).unwrap();
-        print!("=");
     }
 }
