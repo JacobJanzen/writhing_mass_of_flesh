@@ -1,11 +1,18 @@
 # Bubbles
 
-Creates a procedurally generated image that sort of looks like bubbles
+This program procedurally generates a GIF that resembles a writhing mass
+of flesh. Originally, it was intended to be bubbles, but so it goes. 
+
+I strongly recommend compiling in release mode because of the large amount
+of processing that has to happen:
+```
+cargo build --release
+```
 
 USAGE:
-    ```
+```
     bubbles --width <WIDTH> --height <HEIGHT> --frames <FRAMES> --num-cells <NUM_CELLS> --out <OUT>
-    ```
+```
 
 OPTIONS:
 ```
