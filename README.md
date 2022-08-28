@@ -1,7 +1,9 @@
 # Writhing Mass of Flesh
 
 This program procedurally generates a GIF that resembles a writhing mass
-of flesh. Originally, it was intended to be bubbles, but so it goes. 
+of flesh. Originally, it was intended to be bubbles, but so it goes.
+I recommend doing a 500x500 image with 100 cells and 100 frames to
+get the best balance of appearance and run time.
 
 The easiest way to download and compile this is simply
 ```sh
