@@ -1,17 +1,22 @@
-# Bubbles
+# Writhing Mass of Flesh
 
 This program procedurally generates a GIF that resembles a writhing mass
 of flesh. Originally, it was intended to be bubbles, but so it goes. 
 
-I strongly recommend compiling in release mode because of the large amount
-of processing that has to happen:
-```
-cargo build --release
+The easiest way to download and compile this is simply
+```sh
+cargo install writhing_mass_of_flesh
 ```
 
-USAGE:
+Alternatively, you can clone the repository and run
+```sh
+cargo build --release
 ```
-    bubbles --width <WIDTH> --height <HEIGHT> --frames <FRAMES> --num-cells <NUM_CELLS> --out <OUT>
+and the program will be `./target/release/writhing_mass_of_flesh`
+
+USAGE:
+```sh
+writhing_mass_of_flesh --width <WIDTH> --height <HEIGHT> --frames <FRAMES> --num-cells <NUM_CELLS> --out <OUT>
 ```
 
 OPTIONS:
