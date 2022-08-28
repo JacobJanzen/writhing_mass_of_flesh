@@ -12,7 +12,7 @@ Alternatively, you can clone the repository and run
 ```sh
 cargo build --release
 ```
-and the program will be `./target/release/writhing_mass_of_flesh`
+which will put the compiled executable at `./target/release/writhing_mass_of_flesh`
 
 USAGE:
 ```sh
