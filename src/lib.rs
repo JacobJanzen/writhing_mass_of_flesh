@@ -159,8 +159,8 @@ impl Image {
 
                 if self.point_data[index].min_dist < 0.5 {
                     red = 0xFF - (102.0 * self.point_data[index].min_dist) as u8;
-                    green = 0xFF - (512.0 * self.point_data[index].min_dist) as u8;
-                    blue = green;
+                    blue = 0xFF - (512.0 * self.point_data[index].min_dist) as u8;
+                    green = (blue as f64 * 0.8) as u8;
                 } else {
                     red = 0xFF - (408.0 * (self.point_data[index].min_dist - 0.5) + 51.0) as u8;
                     green = 0;
