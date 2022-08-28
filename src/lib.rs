@@ -34,6 +34,7 @@ struct Ellipse {
     width: f64,
     angle: f64,
     curr_point: Point,
+    direction: f64,
 }
 
 #[derive(Clone)]
@@ -109,14 +110,16 @@ impl Image {
 
         let pos = 2.0 * PI * frame as f64 / self.frames as f64;
         for ellipse in &mut self.ellipses {
-            let sin_theta = (ellipse.angle + pos).sin();
-            let cos_theta = (ellipse.angle + pos).cos();
+            let sin_theta = ((ellipse.angle + pos) * ellipse.direction).sin();
+            let cos_theta = ((ellipse.angle + pos) * ellipse.direction).cos();
             let a = ellipse.width / 2.0;
             let b = ellipse.height / 2.0;
             let radius =
                 (a * b) / (a * a * sin_theta * sin_theta + b * b * cos_theta * cos_theta).sqrt();
-            ellipse.curr_point.x = (ellipse.centre.x as f64 + radius * pos.sin()) as i64;
-            ellipse.curr_point.y = (ellipse.centre.y as f64 + radius * pos.cos()) as i64;
+            ellipse.curr_point.x =
+                (ellipse.centre.x as f64 + radius * (pos * ellipse.direction).sin()) as i64;
+            ellipse.curr_point.y =
+                (ellipse.centre.y as f64 + radius * (pos * ellipse.direction).cos()) as i64;
         }
 
         // Get distance and nearest point for each point on the canvas
@@ -215,7 +218,8 @@ fn generate_points(width: u16, height: u16, num_cells: usize) -> Vec<Ellipse> {
             height: 0.0,
             width: 0.0,
             angle: 0.0,
-            curr_point: Point { x: 0, y: 0 }
+            curr_point: Point { x: 0, y: 0 },
+            direction: 0.0
         };
         num_cells
     ];
@@ -226,6 +230,12 @@ fn generate_points(width: u16, height: u16, num_cells: usize) -> Vec<Ellipse> {
         ellipse.height = rand::thread_rng().gen_range(1.0..height as f64 / 5.0);
         ellipse.width = rand::thread_rng().gen_range(1.0..width as f64 / 5.0);
         ellipse.angle = rand::thread_rng().gen_range(0.0..2.0 * PI);
+        let direction = rand::thread_rng().gen_range(0..=1);
+        if direction == 1 {
+            ellipse.direction = 1.0;
+        } else {
+            ellipse.direction = -1.0;
+        }
     }
 
     ellipses
