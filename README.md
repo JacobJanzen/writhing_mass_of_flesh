@@ -33,4 +33,4 @@ OPTIONS:
 ```
 
 ## Example Result:
-![Example Result](./example.gif?raw=true "Title")
+![Example Result](./example.gif?raw=true "Example")
