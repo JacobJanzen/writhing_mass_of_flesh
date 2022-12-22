@@ -31,3 +31,6 @@ OPTIONS:
     -V, --version                  Print version information
     -w, --width <WIDTH>            width of the image
 ```
+
+## Example Result:
+![Example Result](./example.gif?raw=true "Title")
